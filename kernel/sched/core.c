@@ -5879,7 +5879,9 @@ static void migrate_tasks(struct rq *dead_rq, bool migrate_pinned_tasks)
 	 * class method both need to have an up-to-date
 	 * value of rq->clock[_task]
 	 */
+	rq_pin_lock(rq, &rf);
 	update_rq_clock(rq);
+	rq_unpin_lock(rq, &rf);
 
 	for (;;) {
 		/*
@@ -5892,7 +5894,7 @@ static void migrate_tasks(struct rq *dead_rq, bool migrate_pinned_tasks)
 		/*
 		 * pick_next_task assumes pinned rq->lock.
 		 */
-		rq_pin_lock(rq, &rf);
+		rq_repin_lock(rq, &rf);
 		next = pick_next_task(rq, &fake_task, &rf);
 		BUG_ON(!next);
 		next->sched_class->put_prev_task(rq, next);
