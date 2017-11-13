@@ -128,7 +128,7 @@ $(subdirs):
 
 targets := $(wildcard $(sort $(targets)))
 cmd_files := $(wildcard \
-             $(foreach f,$(targets),$(dir $(f)).$(notdir $(f)).cmd))
+             $(foreach f,$(sort $(targets)),$(dir $(f)).$(notdir $(f)).cmd))
 
 ifneq ($(cmd_files),)
 	include $(cmd_files)
