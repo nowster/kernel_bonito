@@ -10,9 +10,6 @@
 #
 # Copyright (C) 1995-2001 by Russell King
 
-# Ensure linker flags are correct
-LDFLAGS		:=
-
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 export DTC_FLAGS := -@
 endif
