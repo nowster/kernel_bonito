@@ -19,6 +19,8 @@ ifeq ($(call clang-ifversion, -ge, 0600, y), y)
 ccflags-y += -Wno-section
 endif
 
+ccflags-y += -std=gnu89
+
 obj-y += core.o loadavg.o clock.o cputime.o
 obj-y += idle_task.o fair.o rt.o deadline.o stop_task.o
 obj-y += wait.o swait.o completion.o idle.o
