@@ -398,7 +398,7 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_CFLAGS   := -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-		   -Wno-format-security \
+		   -Wno-format-security -Wno-array-bounds \
 		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast \
 		   -std=gnu89 -Wno-fortify-source -fno-builtin-bcmp
 KBUILD_CPPFLAGS := -D__KERNEL__
