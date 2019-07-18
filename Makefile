@@ -531,6 +531,8 @@ CLANG_FLAGS	+= -no-integrated-as
 CLANG_FLAGS	+= -Werror=unknown-warning-option
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
 KBUILD_AFLAGS	+= $(CLANG_FLAGS)
+# Enable experimental new pass manager for clang
+KBUILD_CFLAGS	+= $(call cc-option,-fexperimental-new-pass-manager)
 endif
 
 ifeq ($(mixed-targets),1)
@@ -696,6 +698,11 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 lto-clang-flags	:= -flto -fvisibility=hidden
+
+# Enable experimental new pass manager for lld
+ifeq ($(ld-name),lld)
+LDFLAGS		+= $(call ld-option, --lto-new-pass-manager,)
+endif
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
