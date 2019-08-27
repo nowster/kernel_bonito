@@ -400,7 +400,7 @@ KBUILD_CFLAGS   := -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -march=armv8.2-a -mtune=cortex-a75 \
-		   -std=gnu89
+		   -std=gnu89 -Wno-fortify-source -fno-builtin-bcmp
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
