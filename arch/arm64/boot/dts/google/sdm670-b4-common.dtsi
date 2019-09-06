@@ -12,6 +12,10 @@
 	qcom,dsi-display-active;
 };
 
+&mdss_dsi_phy0 {
+	qcom,panel-allow-phy-poweroff;
+};
+
 &routing {
 	qcom,msm-pcm-config = "b4";
 };
