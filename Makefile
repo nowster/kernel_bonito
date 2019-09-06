@@ -395,10 +395,11 @@ LINUXINCLUDE    := \
 LINUXINCLUDE	+= $(filter-out $(LINUXINCLUDE),$(USERINCLUDE))
 
 KBUILD_AFLAGS   := -D__ASSEMBLY__
-KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+KBUILD_CFLAGS   := -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
+		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -march=armv8.2-a -mtune=cortex-a75 \
 		   -std=gnu89
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
@@ -737,19 +738,11 @@ DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
 endif
 
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
+# Optimizations
+KBUILD_CFLAGS	+= -O3 -fassociative-math -freciprocal-math -ffp-contract=fast
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
-else
-ifdef CONFIG_PROFILE_ALL_BRANCHES
-KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
-else
-KBUILD_CFLAGS   += -O2
-endif
-endif
 
-KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
-			$(call cc-disable-warning,maybe-uninitialized,))
+KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
