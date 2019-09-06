@@ -1,0 +1,3 @@
+[submodule "drivers/staging/fw-api"]
+	path = drivers/staging/fw-api
+	url = https://android.googlesource.com/kernel/msm-modules/wlan-fw-api
