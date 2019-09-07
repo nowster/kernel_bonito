@@ -399,7 +399,7 @@ KBUILD_CFLAGS   := -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -march=armv8.2-a -mtune=cortex-a75 \
+		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast \
 		   -std=gnu89 -Wno-fortify-source -fno-builtin-bcmp
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
@@ -531,6 +531,10 @@ CLANG_FLAGS	+= -no-integrated-as
 CLANG_FLAGS	+= -Werror=unknown-warning-option
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
 KBUILD_AFLAGS	+= $(CLANG_FLAGS)
+endif
+
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS	+= -mcpu=cortex-a55+crypto+crc
 endif
 
 ifeq ($(mixed-targets),1)
