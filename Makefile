@@ -759,7 +759,7 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a55+crypto+crc
+KBUILD_CFLAGS	+= -mcpu=cortex-a75+crypto+crc
 endif
 
 ifdef CONFIG_CC_WERROR
