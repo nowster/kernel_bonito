@@ -399,7 +399,7 @@ KBUILD_CFLAGS   := -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security -Wno-array-bounds \
-		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast \
+		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -march=armv8.2-a -mtune=cortex-a75 \
 		   -std=gnu89 -Wno-fortify-source -fno-builtin-bcmp
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
@@ -757,10 +757,6 @@ endif
 
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
-
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a75+crypto+crc
-endif
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
