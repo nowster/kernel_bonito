@@ -399,7 +399,6 @@ KBUILD_CFLAGS   := -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security -Wno-array-bounds \
-		   -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -march=armv8.2-a -mtune=cortex-a75 \
 		   -std=gnu89 -Wno-fortify-source -fno-builtin-bcmp
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
@@ -668,14 +667,6 @@ CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage \
 CFLAGS_KCOV	:= $(call cc-option,-fsanitize-coverage=trace-pc,)
 export CFLAGS_GCOV CFLAGS_KCOV
 
-ifeq ($(ld-name),lld)
-KBUILD_CFLAGS	+= -fuse-ld=lld
-LDFLAGS	+= -O3
-ifdef CONFIG_LTO_CLANG
-LDFLAGS	+= $(call ld-option, --lto-O3,)
-endif
-endif
-
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
 ARCH_CPPFLAGS :=
@@ -698,11 +689,6 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 lto-clang-flags	:= -flto -fvisibility=hidden
-
-# Enable experimental new pass manager for lld
-ifeq ($(ld-name),lld)
-LDFLAGS		+= $(call ld-option, --lto-new-pass-manager,)
-endif
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
@@ -755,6 +741,7 @@ DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
 endif
 
+KBUILD_CFLAGS   += -O2 -g0 -DNDEBUG -fno-stack-protector
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
@@ -790,24 +777,24 @@ endif
 # This selects the stack protector compiler flag. Testing it is delayed
 # until after .config has been reprocessed, in the prepare-compiler-check
 # target.
-ifdef CONFIG_CC_STACKPROTECTOR_REGULAR
-  stackp-flag := -fstack-protector
-  stackp-name := REGULAR
-else
-ifdef CONFIG_CC_STACKPROTECTOR_STRONG
-  stackp-flag := -fstack-protector-strong
-  stackp-name := STRONG
-else
-  # Force off for distro compilers that enable stack protector by default.
-  stackp-flag := $(call cc-option, -fno-stack-protector)
-endif
-endif
-# Find arch-specific stack protector compiler sanity-checking script.
-ifdef CONFIG_CC_STACKPROTECTOR
-  stackp-path := $(srctree)/scripts/gcc-$(SRCARCH)_$(BITS)-has-stack-protector.sh
-  stackp-check := $(wildcard $(stackp-path))
-endif
-KBUILD_CFLAGS += $(stackp-flag)
+# ifdef CONFIG_CC_STACKPROTECTOR_REGULAR
+#   stackp-flag := -fstack-protector
+#   stackp-name := REGULAR
+# else
+# ifdef CONFIG_CC_STACKPROTECTOR_STRONG
+#   stackp-flag := -fstack-protector-strong
+#   stackp-name := STRONG
+# else
+#   # Force off for distro compilers that enable stack protector by default.
+#   stackp-flag := $(call cc-option, -fno-stack-protector)
+# endif
+# endif
+# # Find arch-specific stack protector compiler sanity-checking script.
+# ifdef CONFIG_CC_STACKPROTECTOR
+#   stackp-path := $(srctree)/scripts/gcc-$(SRCARCH)_$(BITS)-has-stack-protector.sh
+#   stackp-check := $(wildcard $(stackp-path))
+# endif
+# KBUILD_CFLAGS += $(stackp-flag)
 
 ifeq ($(cc-name),clang)
 KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
@@ -879,6 +866,12 @@ ifdef CONFIG_DYNAMIC_FTRACE
 		export BUILD_C_RECORDMCOUNT
 	endif
 endif
+endif
+
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS   += -mcpu=kryo
+KBUILD_CFLAGS	+= -fuse-ld=lld
+LDFLAGS	+= $(call ld-option, --lto-new-pass-manager,)
 endif
 
 # We trigger additional mismatches with less inlining
@@ -1204,19 +1197,19 @@ ifdef lto-flags
   endif
 endif
 # Make sure compiler supports requested stack protector flag.
-ifdef stackp-name
-  ifeq ($(call cc-option, $(stackp-flag)),)
-	@echo Cannot use CONFIG_CC_STACKPROTECTOR_$(stackp-name): \
-		  $(stackp-flag) not supported by compiler >&2 && exit 1
-  endif
-endif
+# ifdef stackp-name
+#   ifeq ($(call cc-option, $(stackp-flag)),)
+# 	@echo Cannot use CONFIG_CC_STACKPROTECTOR_$(stackp-name): \
+# 		  $(stackp-flag) not supported by compiler >&2 && exit 1
+#   endif
+# endif
 # Make sure compiler does not have buggy stack-protector support.
-ifdef stackp-check
-  ifneq ($(shell $(CONFIG_SHELL) $(stackp-check) $(CC) $(KBUILD_CPPFLAGS) $(biarch)),y)
-	@echo Cannot use CONFIG_CC_STACKPROTECTOR_$(stackp-name): \
-                  $(stackp-flag) available but compiler is broken >&2 && exit 1
-  endif
-endif
+# ifdef stackp-check
+#   ifneq ($(shell $(CONFIG_SHELL) $(stackp-check) $(CC) $(KBUILD_CPPFLAGS) $(biarch)),y)
+# 	@echo Cannot use CONFIG_CC_STACKPROTECTOR_$(stackp-name): \
+#                   $(stackp-flag) available but compiler is broken >&2 && exit 1
+#   endif
+# endif
 ifdef cfi-flags
   ifeq ($(call cc-option, $(cfi-flags)),)
 	@echo Cannot use CONFIG_CFI: $(cfi-flags) not supported by compiler >&2 && exit 1
