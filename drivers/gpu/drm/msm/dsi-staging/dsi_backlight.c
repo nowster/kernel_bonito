@@ -34,6 +34,9 @@
 #define BL_STATE_LP		BL_CORE_DRIVER1
 #define BL_STATE_LP2		BL_CORE_DRIVER2
 
+bool backlight_dimmer = 0;
+module_param(backlight_dimmer, bool, 0644);
+
 struct dsi_backlight_pwm_config {
 	bool pwm_pmi_control;
 	u32 pwm_pmic_bank;
@@ -135,7 +138,7 @@ static u32 dsi_backlight_calculate_normal(struct dsi_backlight_config *bl,
 		/* map UI brightness into driver backlight level rounding it */
 		rc = dsi_backlight_lerp(
 			1, bl->brightness_max_level,
-			bl->bl_min_level ? : 1, bl->bl_max_level,
+			backlight_dimmer ? 1 : bl->bl_min_level, bl->bl_max_level,
 			brightness, &bl_lvl);
 		if (unlikely(rc))
 			pr_err("failed to linearly interpolate, brightness unmodified\n");
