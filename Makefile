@@ -526,14 +526,9 @@ endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
-CLANG_FLAGS	+= -no-integrated-as
 CLANG_FLAGS	+= -Werror=unknown-warning-option
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
-KBUILD_AFLAGS	+= $(CLANG_FLAGS)
-endif
-
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a55+crypto+crc
+KBUILD_AFLAGS	+= $(CLANG_FLAGS) -no-integrated-as
 endif
 
 ifeq ($(mixed-targets),1)
@@ -666,7 +661,7 @@ KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
 CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage \
 	$(call cc-option,-fno-tree-loop-im) \
 	$(call cc-disable-warning,maybe-uninitialized,)
-CFLAGS_KCOV	:= $(call cc-option,-fsanitize-coverage=trace-pc,)
+CFLAGS_KCOV	:= 
 export CFLAGS_GCOV CFLAGS_KCOV
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
@@ -690,7 +685,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
 endif
 
 ifdef CONFIG_LTO_CLANG
-lto-clang-flags	:= -flto -fvisibility=hidden
+lto-clang-flags	:= -flto=thin -fvisibility=hidden
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
@@ -710,14 +705,14 @@ export LDFINAL_vmlinux LDFLAGS_FINAL_vmlinux
 endif
 
 ifdef CONFIG_CFI_CLANG
-cfi-clang-flags	+= -fsanitize=cfi $(call cc-option, -fsplit-lto-unit)
-DISABLE_CFI_CLANG := -fno-sanitize=cfi
+cfi-clang-flags	+= $(call cc-option, -fsplit-lto-unit)
+DISABLE_CFI_CLANG :=
 ifdef CONFIG_MODULES
-cfi-clang-flags	+= -fsanitize-cfi-cross-dso
-DISABLE_CFI_CLANG += -fno-sanitize-cfi-cross-dso
+cfi-clang-flags	+= 
+DISABLE_CFI_CLANG +=
 endif
 ifdef CONFIG_CFI_PERMISSIVE
-cfi-clang-flags	+= -fsanitize-recover=cfi -fno-sanitize-trap=cfi
+cfi-clang-flags	+= 
 endif
 
 # also disable CFI when LTO is disabled
@@ -737,13 +732,13 @@ export DISABLE_CFI
 endif
 
 ifdef CONFIG_SHADOW_CALL_STACK
-scs-flags	:= -fsanitize=shadow-call-stack
+scs-flags	:= 
 KBUILD_CFLAGS	+= $(scs-flags)
-DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
+DISABLE_SCS	:= 
 export DISABLE_SCS
 endif
 
-KBUILD_CFLAGS   += -O2 -march=armv8.2-a -mtune=cortex-a75 -g0 -DNDEBUG -fno-stack-protector
+KBUILD_CFLAGS   += -O2 -g0 -DNDEBUG -fno-stack-protector
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
