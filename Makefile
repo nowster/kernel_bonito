@@ -738,7 +738,7 @@ DISABLE_SCS	:=
 export DISABLE_SCS
 endif
 
-KBUILD_CFLAGS   += -O2 -g0 -DNDEBUG -fno-stack-protector
+KBUILD_CFLAGS   += -O2 -g0 -DNDEBUG -fno-stack-protector -aa-eval
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
