@@ -34,7 +34,7 @@
 #define BL_STATE_LP		BL_CORE_DRIVER1
 #define BL_STATE_LP2		BL_CORE_DRIVER2
 
-bool backlight_dimmer = 0;
+bool backlight_dimmer = 1;
 module_param(backlight_dimmer, bool, 0644);
 
 struct dsi_backlight_pwm_config {
