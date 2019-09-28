@@ -679,13 +679,8 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
-ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
-KBUILD_CFLAGS	+= $(call cc-option,-ffunction-sections,)
-KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
-endif
-
 ifdef CONFIG_LTO_CLANG
-lto-clang-flags	:= -flto=thin -fsplit-lto-unit -fvisibility=hidden
+lto-clang-flags	:=
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
@@ -738,22 +733,23 @@ DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
 endif
 
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
+KBUILD_CFLAGS   += -O2 -g0 -DNDEBUG -fno-stack-protector
+KBUILD_CFLAGS   += -flto=thin -fsplit-lto-unit -fvisibility=hidden -ffunction-sections -fdata-sections
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
-else
-ifdef CONFIG_PROFILE_ALL_BRANCHES
-KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
-else
-KBUILD_CFLAGS   += -O2
-endif
-endif
-
-KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
-			$(call cc-disable-warning,maybe-uninitialized,))
+KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
+endif
+
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS   += -O3 -fuse-ld=lld
+LDFLAGS += -O3
+endif
+
+# Enable experimental new pass manager for lld
+ifeq ($(ld-name),lld)
+LDFLAGS		+= $(call ld-option, --lto-new-pass-manager,) $(call ld-option, --lto-O3,)
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
