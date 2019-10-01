@@ -113,8 +113,8 @@ static struct kmem_cache *bfq_pool;
 #define BFQ_MIN_TT		(2 * NSEC_PER_MSEC)
 
 /* hw_tag detection: parallel requests threshold and min samples needed. */
-#define BFQ_HW_QUEUE_THRESHOLD	4
-#define BFQ_HW_QUEUE_SAMPLES	32
+#define BFQ_HW_QUEUE_THRESHOLD	8
+#define BFQ_HW_QUEUE_SAMPLES	64
 
 #define BFQQ_SEEK_THR		(sector_t)(8 * 100)
 #define BFQQ_SECT_THR_NONROT	(sector_t)(2 * 32)
@@ -122,7 +122,7 @@ static struct kmem_cache *bfq_pool;
 #define BFQQ_SEEKY(bfqq)	(hweight32(bfqq->seek_history) > 32/8)
 
 /* Min number of samples required to perform peak-rate update */
-#define BFQ_RATE_MIN_SAMPLES	32
+#define BFQ_RATE_MIN_SAMPLES	64
 /* Min observation time interval required to perform a peak-rate update (ns) */
 #define BFQ_RATE_MIN_INTERVAL	(300*NSEC_PER_MSEC)
 /* Target observation time interval for a peak-rate update (ns) */
