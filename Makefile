@@ -741,7 +741,7 @@ KBUILD_CFLAGS	+= -Werror
 endif
 
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -fuse-ld=lld
+KBUILD_CFLAGS   += -O3 -fuse-ld=lld -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce
 LDFLAGS += -O3
 endif
 
