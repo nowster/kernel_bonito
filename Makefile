@@ -741,7 +741,8 @@ KBUILD_CFLAGS	+= -Werror
 endif
 
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -fuse-ld=lld
+KBUILD_CFLAGS   += -O3 -fuse-ld=lld 
+KBUILD_CFLAGS   += -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0
 LDFLAGS += -O3
 endif
 
