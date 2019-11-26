@@ -731,7 +731,7 @@ DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
 endif
 
-KBUILD_CFLAGS   += -march=armv8.2-a -mtune=cortex-a55 -g0 -DNDEBUG -fno-stack-protector
+KBUILD_CFLAGS   += -g0 -DNDEBUG -fno-stack-protector
 KBUILD_CFLAGS   += -flto=thin -fsplit-lto-unit -fvisibility=hidden -ffunction-sections -fdata-sections
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
@@ -741,7 +741,7 @@ KBUILD_CFLAGS	+= -Werror
 endif
 
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -fuse-ld=lld
+KBUILD_CFLAGS   += -O3 -march=armv8.2-a -mtune=kryo -fuse-ld=lld
 LDFLAGS += -O3
 endif
 
