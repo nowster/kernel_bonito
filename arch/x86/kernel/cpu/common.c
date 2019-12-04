@@ -965,7 +965,7 @@ static bool __init cpu_matches(unsigned long which)
 
 u64 x86_read_arch_cap_msr(void)
 {
-	u64 ia32_cap = 0;
+	const struct x86_cpu_id *m = x86_match_cpu(cpu_vuln_whitelist);
 
 	if (boot_cpu_has(X86_FEATURE_ARCH_CAPABILITIES))
 		rdmsrl(MSR_IA32_ARCH_CAPABILITIES, ia32_cap);

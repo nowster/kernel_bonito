@@ -116,6 +116,10 @@ void __init check_bugs(void)
 
 	arch_smt_update();
 
+	mds_select_mitigation();
+
+	arch_smt_update();
+
 #ifdef CONFIG_X86_32
 	/*
 	 * Check whether we are able to run this kernel safely on SMP.
