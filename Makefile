@@ -734,20 +734,10 @@ DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
 endif
 
-KBUILD_CFLAGS   += -g0 -DNDEBUG -fno-stack-protector
+KBUILD_CFLAGS   += -O3 -g0 -DNDEBUG -fno-stack-protector
 KBUILD_CFLAGS   += -flto=thin -fsplit-lto-unit -fvisibility=hidden -ffunction-sections -fdata-sections
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
-
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3 -fuse-ld=lld
-LDFLAGS += -O3
-endif
-
-# Enable experimental new pass manager for lld
-ifeq ($(ld-name),lld)
-LDFLAGS		+= $(call ld-option, --lto-new-pass-manager,) $(call ld-option, --lto-O3,)
-endif
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
