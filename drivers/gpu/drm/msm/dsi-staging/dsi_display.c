@@ -56,6 +56,11 @@ static const struct of_device_id dsi_display_dt_match[] = {
 
 static struct dsi_display *main_display;
 
+struct dsi_display *dsi_display_get_main_display(void)
+{
+	return main_display;
+}
+
 static void dsi_display_mask_ctrl_error_interrupts(struct dsi_display *display)
 {
 	int i;
@@ -4892,10 +4897,12 @@ int dsi_display_dev_probe(struct platform_device *pdev)
 	list_add(&display->list, &dsi_display_list);
 	mutex_unlock(&dsi_display_list_lock);
 
+	main_display = display;
+	pr_notice("%s: Panel Name = %s\n", __func__, display->name);
+
 	if (!display_from_cmdline)
 		display->is_active = of_property_read_bool(pdev->dev.of_node,
 						"qcom,dsi-display-active");
-
 	if (display->is_active) {
 		main_display = display;
 		rc = _dsi_display_dev_init(display);
