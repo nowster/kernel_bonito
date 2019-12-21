@@ -27,6 +27,9 @@
 
 #include "dsi_display.h"
 #include "dsi_panel.h"
+#ifdef CONFIG_DRM_SDE_EXPO
+#include "sde_expo_dim_layer.h"
+#endif
 
 #ifdef CONFIG_KLAPSE
 #include <linux/klapse.h>
@@ -405,7 +408,11 @@ static u32 dsi_backlight_calculate(struct dsi_backlight_config *bl,
 	set_rgb_slider(bl_lvl);
 #endif
 
+#ifdef CONFIG_DRM_SDE_EXPO
+	return expo_calc_backlight(bl_lvl);
+#else
 	return bl_lvl;
+#endif
 }
 
 static int dsi_backlight_update_status(struct backlight_device *bd)
