@@ -4897,9 +4897,6 @@ int dsi_display_dev_probe(struct platform_device *pdev)
 	list_add(&display->list, &dsi_display_list);
 	mutex_unlock(&dsi_display_list_lock);
 
-	main_display = display;
-	pr_notice("%s: Panel Name = %s\n", __func__, display->name);
-
 	if (!display_from_cmdline)
 		display->is_active = of_property_read_bool(pdev->dev.of_node,
 						"qcom,dsi-display-active");
@@ -4920,6 +4917,9 @@ int dsi_display_dev_probe(struct platform_device *pdev)
 		if (!display_from_cmdline)
 			default_active_node = pdev->dev.of_node;
 	}
+
+	pr_notice("%s: Panel Name = %s\n", __func__, display->name);
+
 	return rc;
 }
 
