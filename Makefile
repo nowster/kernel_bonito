@@ -526,10 +526,9 @@ endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
-CLANG_FLAGS	+= -no-integrated-as
 CLANG_FLAGS	+= -fno-builtin-bcmp
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
-KBUILD_AFLAGS	+= $(CLANG_FLAGS)
+KBUILD_AFLAGS	+= $(CLANG_FLAGS) -no-integrated-as
 endif
 
 
@@ -648,14 +647,12 @@ ifdef CONFIG_LTO_CLANG
 # use GNU gold with LLVMgold for LTO linking, and LD for vmlinux_link
 LDFINAL_vmlinux := $(LD)
 LD		:= $(LDGOLD)
-KBUILD_LDFLAGS		+= -plugin LLVMgold.so
-KBUILD_LDFLAGS		+= -plugin-opt=-function-sections
-KBUILD_LDFLAGS		+= -plugin-opt=-data-sections
-# use llvm-ar for building symbol tables from IR files, and llvm-dis instead
+KBUILD_LDFLAGS	+= --plugin=LLVMgold.so
+# use llvm-ar for building symbol tables from IR files, and llvm-nm instead
 # of objdump for processing symbol versions and exports
-LLVM_AR		:= llvm-ar
-LLVM_DIS	:= llvm-dis
-export LLVM_AR LLVM_DIS
+LLVM_AR	:= llvm-ar
+LLVM_NM	:= llvm-nm
+export LLVM_AR LLVM_NM
 endif
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
@@ -695,6 +692,19 @@ KBUILD_CFLAGS	+= $(lto-flags)
 
 DISABLE_LTO	:= $(DISABLE_LTO_CLANG)
 export DISABLE_LTO
+
+ifdef KERNEL_THINLTO_CACHE_PATH
+THINLTO_CACHE_PATH := $(KERNEL_THINLTO_CACHE_PATH)
+else
+THINLTO_CACHE_PATH := .thinlto-cache
+endif
+ifeq ($(ld-name),lld)
+KBUILD_LDFLAGS += --thinlto-cache-dir=$(THINLTO_CACHE_PATH)
+KBUILD_LDFLAGS += --thinlto-cache-policy=cache_size=5%:cache_size_bytes=5g
+else ifeq ($(ld-name),gold)
+KBUILD_LDFLAGS += --plugin-opt=cache-dir=$(THINLTO_CACHE_PATH)
+KBUILD_LDFLAGS += --plugin-opt=cache-policy=cache_size=5%:cache_size_bytes=5g
+endif
 
 # LDFINAL_vmlinux and LDFLAGS_FINAL_vmlinux can be set to override
 # the linker and flags for vmlinux_link.
@@ -736,7 +746,7 @@ export DISABLE_SCS
 endif
 
 KBUILD_CFLAGS   += -O3 -g0 -DNDEBUG -fno-stack-protector
-KBUILD_CFLAGS   += -flto=thin -fsplit-lto-unit -fvisibility=hidden -ffunction-sections -fdata-sections
+KBUILD_CFLAGS   += -flto=thin -fsplit-lto-unit -fvisibility=default -ffunction-sections -fdata-sections
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409)
 
