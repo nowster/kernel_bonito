@@ -435,7 +435,7 @@ CONFIG_PCI_MSI_IRQ_DOMAIN=y
 # CONFIG_PCI_IOV is not set
 # CONFIG_PCI_PRI is not set
 # CONFIG_PCI_PASID is not set
-CONFIG_PCI_MSM=y
+# CONFIG_PCI_MSM is not set
 # CONFIG_HOTPLUG_PCI is not set
 
 #
