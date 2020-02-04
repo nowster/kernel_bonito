@@ -1,5 +1,3 @@
-TARGET_BUILD_VARIANT ?= user
-
 # We can build either as part of a standalone Kernel build or as
 # an external module.  Determine which mechanism is being used
 ifeq ($(MODNAME),)
@@ -31,7 +29,7 @@ ifeq ($(KERNEL_BUILD),1)
 	# These are provided in external module based builds
 	# Need to explicitly define for Kernel-based builds
 	MODNAME := wlan
-	WLAN_ROOT := $(src)
+	WLAN_ROOT := drivers/staging/qcacld-3.0
 	WLAN_COMMON_ROOT := ../qca-wifi-host-cmn
 	WLAN_COMMON_INC := $(WLAN_ROOT)/$(WLAN_COMMON_ROOT)
 endif
@@ -39,9 +37,7 @@ endif
 # Make WLAN as open-source driver by default
 WLAN_OPEN_SOURCE := 1
 
-WLAN_DISABLE_BUILD_TAG := y
-
-ifneq ($(KERNEL_BUILD),)
+ifeq ($(KERNEL_BUILD), 0)
 	# These are configurable via Kconfig for kernel-based builds
 	# Need to explicitly configure for Android-based builds
 
@@ -260,7 +256,7 @@ CONFIG_WLAN_SPECTRAL_SCAN := y
 CONFIG_WLAN_FEATURE_APF := y
 
 #Enable WLAN/Power debugfs feature only if debug_fs is enabled
-ifeq ($(CONFIG_ANDROID), y)
+ifeq ($(CONFIG_DEBUG_FS), y)
        # Flag to enable debugfs. Depends on CONFIG_DEBUG_FS in kernel
        # configuration.
        CONFIG_WLAN_DEBUGFS := y
@@ -476,7 +472,6 @@ HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_csr.o
 HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_connect.o
 HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_offload.o
 HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_roam.o
-CFLAGS_wlan_hdd_debugfs.o += -DCONFIG_DEBUG_FS
 endif
 
 ifeq ($(CONFIG_WLAN_FEATURE_DSRC), y)
