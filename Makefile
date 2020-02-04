@@ -753,6 +753,10 @@ endif
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
 			$(call cc-disable-warning,maybe-uninitialized,))
 
+ifndef CONFIG_CRYPTO_AES_ARM64_CE
+KBUILD_CFLAGS   += -mcpu=cortex-a55
+endif
+
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
 endif
