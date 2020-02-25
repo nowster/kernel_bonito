@@ -19,4 +19,5 @@ obj-$(CONFIG_QPNP_LINEAR_CHARGER)	+= qpnp-linear-charger.o
 # TODO: remove me b/62058353
 subdir-ccflags-y += \
 	-Wno-duplicate-decl-specifier \
+	-Wno-sizeof-array-div \
 

@@ -9,3 +9,4 @@ obj-$(CONFIG_CRYPTO_DEV_QCOM_ICE) += ice.o
 subdir-ccflags-y += \
 	-Wno-ignored-attributes \
 	$(call cc-option,-Wno-frame-larger-than=) \
+	-Wno-bool-operation \
