@@ -1,6 +1,8 @@
 #
 # Makefile for physical layer USB drivers
 #
+subdir-ccflags-y += -Wno-misleading-indentation
+
 obj-$(CONFIG_USB_PHY)			+= phy.o
 obj-$(CONFIG_OF)			+= of.o
 obj-$(CONFIG_USB_OTG_WAKELOCK)		+= otg-wakelock.o
