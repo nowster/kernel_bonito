@@ -668,7 +668,7 @@ int snd_rawmidi_output_params(struct snd_rawmidi_substream *substream,
 			spin_unlock_irq(&runtime->lock);
 			kfree(newbuf);
 			return -EBUSY;
-		}g
+		}
 		runtime->buffer = newbuf;
 		runtime->buffer_size = params->buffer_size;
 		runtime->avail = runtime->buffer_size;
