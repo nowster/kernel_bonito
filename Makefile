@@ -400,7 +400,13 @@ KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 KBUILD_LDFLAGS :=
 GCC_PLUGINS_CFLAGS :=
-CLANG_FLAGS :=
+
+# Custom cflags
+FNO_SANITIZE_CFLAGS := -fno-sanitize-address-poison-custom-array-cookie -fno-sanitize-address-use-after-scope -fno-sanitize-address-use-odr-indicator -fno-sanitize-blacklist -fno-sanitize-cfi-cross-dso -fno-sanitize-memory-track-origins -fno-sanitize-memory-use-after-dtor -fno-sanitize-stats -fno-sanitize-thread-atomics -fno-sanitize-thread-func-entry-exit -fno-sanitize-thread-memory-access 
+
+POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM -mllvm -polly-num-threads=4 -mllvm -polly-scheduling=dynamic -mllvm -polly-scheduling-chunksize=1
+
+CLANG_FLAGS := -O3 -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(FNO_SANITIZE_CFLAGS)
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
@@ -730,16 +736,6 @@ scs-flags	:= -fsanitize=shadow-call-stack
 KBUILD_CFLAGS	+= $(scs-flags)
 DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
-endif
-
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS   += -Os
-else
-KBUILD_CFLAGS   += -O2
-endif
-
-ifndef CONFIG_CRYPTO_AES_ARM64_CE
-KBUILD_CFLAGS   += -mcpu=cortex-a55
 endif
 
 ifdef CONFIG_CC_WERROR
