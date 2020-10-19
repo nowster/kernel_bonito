@@ -406,7 +406,9 @@ FNO_SANITIZE_CFLAGS := -fno-sanitize-address-poison-custom-array-cookie -fno-san
 
 POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM -mllvm -polly-num-threads=4 -mllvm -polly-scheduling=dynamic -mllvm -polly-scheduling-chunksize=1
 
-CLANG_FLAGS := -O3 -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(FNO_SANITIZE_CFLAGS)
+LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0
+
+CLANG_FLAGS := -O3 -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(FNO_SANITIZE_CFLAGS) $(LLVM_CFLAGS)
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
