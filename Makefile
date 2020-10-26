@@ -408,7 +408,7 @@ POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectori
 
 LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0
 
-CLANG_FLAGS := -O3 -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(FNO_SANITIZE_CFLAGS) $(LLVM_CFLAGS)
+CLANG_FLAGS := -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(FNO_SANITIZE_CFLAGS) $(LLVM_CFLAGS)
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
