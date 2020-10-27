@@ -594,7 +594,7 @@ int schedtune_can_attach(struct cgroup_taskset *tset)
 	struct task_struct *task;
 	struct cgroup_subsys_state *css;
 	struct boost_groups *bg;
-	struct rq_flags irq_flags;
+	struct rq_flags rq_flags;
 	unsigned int cpu;
 	struct rq *rq;
 	int src_bg; /* Source boost group index */
@@ -612,10 +612,10 @@ int schedtune_can_attach(struct cgroup_taskset *tset)
 		 * conditions with migration code while the task is being
 		 * accounted
 		 */
-		rq = lock_rq_of(task, &irq_flags);
+		rq = task_rq_lock(task, &rq_flags);
 
 		if (!task->on_rq) {
-			unlock_rq_of(rq, task, &irq_flags);
+			task_rq_unlock(rq, task, &rq_flags);
 			continue;
 		}
 
@@ -636,7 +636,7 @@ int schedtune_can_attach(struct cgroup_taskset *tset)
 		 */
 		if (unlikely(dst_bg == src_bg)) {
 			raw_spin_unlock(&bg->lock);
-			unlock_rq_of(rq, task, &irq_flags);
+			task_rq_unlock(rq, task, &rq_flags);
 			continue;
 		}
 
@@ -651,7 +651,7 @@ int schedtune_can_attach(struct cgroup_taskset *tset)
 		bg->group[dst_bg].tasks += 1;
 
 		raw_spin_unlock(&bg->lock);
-		unlock_rq_of(rq, task, &irq_flags);
+		task_rq_unlock(rq, task, &rq_flags);
 
 		/* Update CPU boost group */
 		if (bg->group[src_bg].tasks == 0 || bg->group[dst_bg].tasks == 1)
@@ -761,7 +761,7 @@ void schedtune_dequeue_task(struct task_struct *p, int cpu)
 void schedtune_exit_task(struct task_struct *tsk)
 {
 	struct schedtune *st;
-	struct rq_flags irq_flags;
+	struct rq_flags rq_flags;
 	unsigned int cpu;
 	struct rq *rq;
 	int idx;
@@ -769,7 +769,7 @@ void schedtune_exit_task(struct task_struct *tsk)
 	if (!unlikely(schedtune_initialized))
 		return;
 
-	rq = lock_rq_of(tsk, &irq_flags);
+	rq = task_rq_lock(tsk, &rq_flags);
 	rcu_read_lock();
 
 	cpu = cpu_of(rq);
@@ -778,7 +778,7 @@ void schedtune_exit_task(struct task_struct *tsk)
 	schedtune_tasks_update(tsk, cpu, idx, DEQUEUE_TASK);
 
 	rcu_read_unlock();
-	unlock_rq_of(rq, tsk, &irq_flags);
+	task_rq_unlock(rq, tsk, &rq_flags);
 }
 
 int schedtune_cpu_boost(int cpu)

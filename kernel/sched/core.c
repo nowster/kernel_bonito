@@ -3281,6 +3281,7 @@ void scheduler_tick(void)
 	bool early_notif;
 	u32 old_load;
 	struct related_thread_group *grp;
+	struct rq_flags rf;
 
 	sched_clock_tick();
 
@@ -5874,7 +5875,6 @@ static void migrate_tasks(struct rq *dead_rq, struct rq_flags *rf, bool migrate_
 	struct rq *rq = dead_rq;
 	struct task_struct *next, *stop = rq->stop;
 	struct rq_flags orf = *rf;
-	struct old_rf;
 	int dest_cpu;
 	unsigned int num_pinned_kthreads = 1; /* this thread */
 	LIST_HEAD(tasks);
@@ -5919,7 +5919,7 @@ static void migrate_tasks(struct rq *dead_rq, struct rq_flags *rf, bool migrate_
 			!cpumask_intersects(&avail_cpus, &next->cpus_allowed)) {
 			detach_one_task(next, rq, &tasks);
 			num_pinned_kthreads += 1;
-			rq_unpin_lock(rq, &rf);
+			rq_unpin_lock(rq, rf);
 			continue;
 		}
 
@@ -5950,13 +5950,6 @@ static void migrate_tasks(struct rq *dead_rq, struct rq_flags *rf, bool migrate_
 			continue;
 		}
 
-		/*
-		 * __migrate_task() may return with a different
-		 * rq->lock held and a new cookie in 'rf', but we need
-		 * to preserve rf::clock_update_flags for 'dead_rq'.
-		 */
-		old_rf = rf;
-
 		/* Find suitable destination for @next, with force if needed. */
 		dest_cpu = select_fallback_rq(dead_rq->cpu, next, false);
 
@@ -5966,7 +5959,6 @@ static void migrate_tasks(struct rq *dead_rq, struct rq_flags *rf, bool migrate_
 			rq = dead_rq;
 			raw_spin_lock(&next->pi_lock);
 			raw_spin_lock(&rq->lock);
-			rf = old_rf;
 			*rf = orf;
 			rq_relock(rq, rf);
 		}
@@ -5986,6 +5978,7 @@ int do_isolation_work_cpu_stop(void *data)
 {
 	unsigned int cpu = smp_processor_id();
 	struct rq *rq = cpu_rq(cpu);
+	struct rq_flags rf;
 
 	watchdog_disable(cpu);
 
@@ -6006,7 +5999,7 @@ int do_isolation_work_cpu_stop(void *data)
 		set_rq_offline(rq);
 	}
 
-	migrate_tasks(rq, false);
+	migrate_tasks(rq, &rf, false);
 
 	if (rq->rd)
 		set_rq_online(rq);
