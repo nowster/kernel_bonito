@@ -23,6 +23,7 @@
 #include <linux/of_gpio.h>
 #include <dt-bindings/clock/qcom,audio-ext-clk.h>
 #include <dsp/q6afe-v2.h>
+#include <dsp/q6core.h>
 #include "audio-ext-clk-up.h"
 
 enum audio_clk_mux {
@@ -46,7 +47,7 @@ struct audio_ext_ap_clk {
 
 struct audio_ext_pmi_clk {
 	int gpio;
-	struct clk_dummy hw;
+	struct clk_fixed_factor fact;
 };
 
 struct audio_ext_ap_clk2 {
@@ -176,6 +177,20 @@ static int audio_ext_lpass_mclk_prepare(struct clk_hw *hw)
 	struct audio_ext_lpass_mclk *audio_lpass_mclk = to_audio_lpass_mclk(hw);
 	struct pinctrl_info *pnctrl_info = &audio_lpass_mclk->pnctrl_info;
 	int ret;
+	unsigned long timeout;
+
+	if (!q6core_is_adsp_ready()) {
+		pr_debug("ADSP isn't ready\n");
+		timeout = jiffies +
+			msecs_to_jiffies(2 * 100);
+		while (!time_after(jiffies, timeout)) {
+			if (!q6core_is_adsp_ready()) {
+				pr_info("ADSP isn't ready\n");
+			} else {
+				pr_debug("ADSP is ready\n");
+			}
+		}
+	}
 
 	lpass_mclk.enable = 1;
 	ret = afe_set_lpass_clock_v2(AFE_PORT_ID_PRIMARY_MI2S_RX,
@@ -297,21 +312,29 @@ static const struct clk_ops audio_ext_lpass_mclk2_ops = {
 
 static struct audio_ext_pmi_clk audio_pmi_clk = {
 	.gpio = -EINVAL,
-	.hw.hw.init = &(struct clk_init_data){
-		.name = "audio_ext_pmi_clk",
-		.parent_names = (const char *[]){ "div_clk1" },
-		.num_parents = 1,
-		.ops = &clk_dummy_ops,
+	.fact = {
+		.mult = 1,
+		.div = 1,
+		.hw.init = &(struct clk_init_data){
+			.name = "audio_ext_pmi_clk",
+			.parent_names = (const char *[]){ "div_clk1" },
+			.num_parents = 1,
+			.ops = &clk_dummy_ops,
+		},
 	},
 };
 
 static struct audio_ext_pmi_clk audio_pmi_lnbb_clk = {
 	.gpio = -EINVAL,
-	.hw.hw.init = &(struct clk_init_data){
-		.name = "audio_ext_pmi_lnbb_clk",
-		.parent_names = (const char *[]){ "ln_bb_clk3" },
-		.num_parents = 1,
-		.ops = &clk_dummy_ops,
+	.fact = {
+		.mult = 1,
+		.div = 1,
+		.hw.init = &(struct clk_init_data){
+			.name = "audio_ext_pmi_lnbb_clk",
+			.parent_names = (const char *[]){ "ln_bb_clk3" },
+			.num_parents = 1,
+			.ops = &clk_dummy_ops,
+		},
 	},
 };
 
@@ -365,7 +388,7 @@ static struct audio_ext_lpass_mclk audio_lpass_mclk2 = {
 };
 
 static struct clk_hw *audio_msm_hws[] = {
-	&audio_pmi_clk.hw.hw,
+	&audio_pmi_clk.fact.hw,
 	&audio_ap_clk.fact.hw,
 	&audio_ap_clk2.fact.hw,
 	&audio_lpass_mclk.fact.hw,
@@ -373,7 +396,7 @@ static struct clk_hw *audio_msm_hws[] = {
 };
 
 static struct clk_hw *audio_msm_hws1[] = {
-	&audio_pmi_lnbb_clk.hw.hw,
+	&audio_pmi_lnbb_clk.fact.hw,
 };
 
 static int audio_get_pinctrl(struct platform_device *pdev,
