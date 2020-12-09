@@ -260,7 +260,7 @@ CONFIG_WLAN_SPECTRAL_SCAN := y
 CONFIG_WLAN_FEATURE_APF := y
 
 #Enable WLAN/Power debugfs feature only if debug_fs is enabled
-ifeq ($(CONFIG_DEBUG_FS), y)
+ifeq ($(CONFIG_ANDROID), y)
        # Flag to enable debugfs. Depends on CONFIG_DEBUG_FS in kernel
        # configuration.
        CONFIG_WLAN_DEBUGFS := y
@@ -476,6 +476,7 @@ HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_csr.o
 HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_connect.o
 HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_offload.o
 HDD_OBJS += $(HDD_SRC_DIR)/wlan_hdd_debugfs_roam.o
+CFLAGS_wlan_hdd_debugfs.o += -DCONFIG_DEBUG_FS
 endif
 
 ifeq ($(CONFIG_WLAN_FEATURE_DSRC), y)
@@ -1890,9 +1891,9 @@ KBUILD_CPPFLAGS += $(CDEFINES)
 # is disabling the maybe-uninitialized warning.  Re-enable it for the
 # WLAN driver.  Note that we must use EXTRA_CFLAGS here so that it
 # will override the kernel settings.
-ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
-EXTRA_CFLAGS += -Wmaybe-uninitialized
-endif
+# ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
+# EXTRA_CFLAGS += -Wmaybe-uninitialized
+# endif
 EXTRA_CFLAGS += -Wmissing-prototypes
 
 ifeq ($(call cc-option-yn, -Wheader-guard),y)
