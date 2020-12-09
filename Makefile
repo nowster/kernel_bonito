@@ -404,7 +404,8 @@ KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 GCC_PLUGINS_CFLAGS :=
-CLANG_FLAGS :=
+
+CLANG_FLAGS := -O3 -mtune=cortex-a55
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
@@ -734,12 +735,6 @@ scs-flags	:= -fsanitize=shadow-call-stack
 KBUILD_CFLAGS	+= $(scs-flags)
 DISABLE_SCS	:= -fno-sanitize=shadow-call-stack
 export DISABLE_SCS
-endif
-
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS   += -Os
-else
-KBUILD_CFLAGS   += -O2
 endif
 
 ifdef CONFIG_CC_WERROR
