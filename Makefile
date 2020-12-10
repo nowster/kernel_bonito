@@ -657,9 +657,9 @@ KBUILD_LDFLAGS		+= -plugin-opt=-function-sections
 KBUILD_LDFLAGS		+= -plugin-opt=-data-sections
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
-LLVM_AR		:= llvm-ar
-LLVM_DIS	:= llvm-dis
-export LLVM_AR LLVM_DIS
+LLVM_AR	:= llvm-ar
+LLVM_NM	:= llvm-nm
+export LLVM_AR LLVM_NM
 endif
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
@@ -690,7 +690,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
 endif
 
 ifdef CONFIG_LTO_CLANG
-lto-clang-flags	:= -flto -fvisibility=hidden
+lto-clang-flags	:= -flto=thin -fsplit-lto-unit -fvisibility=default
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
@@ -703,6 +703,19 @@ KBUILD_CFLAGS	+= $(lto-flags)
 
 DISABLE_LTO	:= $(DISABLE_LTO_CLANG)
 export DISABLE_LTO
+
+ifdef KERNEL_THINLTO_CACHE_PATH
+THINLTO_CACHE_PATH := $(KERNEL_THINLTO_CACHE_PATH)
+else
+THINLTO_CACHE_PATH := .thinlto-cache
+endif
+ifeq ($(ld-name),lld)
+KBUILD_LDFLAGS += --thinlto-cache-dir=$(THINLTO_CACHE_PATH)
+KBUILD_LDFLAGS += --thinlto-cache-policy=cache_size=5%:cache_size_bytes=5g
+else ifeq ($(ld-name),gold)
+KBUILD_LDFLAGS += --plugin-opt=cache-dir=$(THINLTO_CACHE_PATH)
+KBUILD_LDFLAGS += --plugin-opt=cache-policy=cache_size=5%:cache_size_bytes=5g
+endif
 
 # LDFINAL_vmlinux and LDFLAGS_FINAL_vmlinux can be set to override
 # the linker and flags for vmlinux_link.
@@ -1061,19 +1074,19 @@ core-y		:= $(patsubst %/, %/built-in.o, $(core-y))
 drivers-y	:= $(patsubst %/, %/built-in.o, $(drivers-y))
 net-y		:= $(patsubst %/, %/built-in.o, $(net-y))
 libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))
-libs-y2		:= $(filter-out %.a, $(patsubst %/, %/built-in.o, $(libs-y)))
+libs-y2		:= $(patsubst %/, %/built-in.o, $(libs-y))
+libs-y		:= $(libs-y1) $(libs-y2)
 virt-y		:= $(patsubst %/, %/built-in.o, $(virt-y))
 
 # Externally visible symbols (used by link-vmlinux.sh)
 export KBUILD_VMLINUX_INIT := $(head-y) $(init-y)
-export KBUILD_VMLINUX_MAIN := $(core-y) $(libs-y2) $(drivers-y) $(net-y) $(virt-y)
-export KBUILD_VMLINUX_LIBS := $(libs-y1)
+export KBUILD_VMLINUX_MAIN := $(core-y) $(libs-y) $(drivers-y) $(net-y) $(virt-y)
 export KBUILD_LDS          := arch/$(SRCARCH)/kernel/vmlinux.lds
 export LDFLAGS_vmlinux
 # used by scripts/pacmage/Makefile
 export KBUILD_ALLDIRS := $(sort $(filter-out arch/%,$(vmlinux-alldirs)) arch Documentation include samples scripts tools)
 
-vmlinux-deps := $(KBUILD_LDS) $(KBUILD_VMLINUX_INIT) $(KBUILD_VMLINUX_MAIN) $(KBUILD_VMLINUX_LIBS)
+vmlinux-deps := $(KBUILD_LDS) $(KBUILD_VMLINUX_INIT) $(KBUILD_VMLINUX_MAIN)
 
 # Include targets which we want to execute sequentially if the rest of the
 # kernel build went well. If CONFIG_TRIM_UNUSED_KSYMS is set, this might be
