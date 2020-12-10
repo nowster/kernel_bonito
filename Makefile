@@ -405,7 +405,14 @@ KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 GCC_PLUGINS_CFLAGS :=
 
-CLANG_FLAGS := -O3 -mtune=cortex-a55
+# Custom cflags
+FNO_SANITIZE_CFLAGS := -fno-sanitize-address-poison-custom-array-cookie -fno-sanitize-address-use-after-scope -fno-sanitize-address-use-odr-indicator -fno-sanitize-blacklist -fno-sanitize-cfi-cross-dso -fno-sanitize-memory-track-origins -fno-sanitize-memory-use-after-dtor -fno-sanitize-stats -fno-sanitize-thread-atomics -fno-sanitize-thread-func-entry-exit -fno-sanitize-thread-memory-access 
+
+POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM -mllvm -polly-num-threads=4 -mllvm -polly-scheduling=dynamic -mllvm -polly-scheduling-chunksize=1
+
+LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0
+
+CLANG_FLAGS := -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(FNO_SANITIZE_CFLAGS) $(LLVM_CFLAGS)
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
@@ -524,10 +531,9 @@ endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
-CLANG_FLAGS	+= -no-integrated-as
 CLANG_FLAGS	+= -Werror=unknown-warning-option
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
-KBUILD_AFLAGS	+= $(CLANG_FLAGS)
+KBUILD_AFLAGS	+= $(CLANG_FLAGS) -no-integrated-as
 endif
 
 
