@@ -5183,11 +5183,13 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 		ext4_register_li_request(sb, first_not_zeroed);
 	}
 
-	ext4_setup_system_zone(sb);
 	if (sbi->s_journal == NULL && !(old_sb_flags & MS_RDONLY)) {
 		err = ext4_commit_super(sb, 1);
 		goto restore_opts;
 	}
+	err = ext4_setup_system_zone(sb);
+	if (err)
+		goto restore_opts;
 
 #ifdef CONFIG_QUOTA
 	/* Release old quota file names */
