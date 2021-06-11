@@ -65,6 +65,7 @@
 #include <linux/kthread.h>
 #include <linux/memcontrol.h>
 #include <linux/show_mem_notifier.h>
+#include <linux/khugepaged.h>
 #include <linux/psi.h>
 #include <linux/khugepaged.h>
 #include <linux/cpu_input_boost.h>
