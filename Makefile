@@ -655,6 +655,7 @@ LD		:= $(LDGOLD)
 KBUILD_LDFLAGS		+= -plugin LLVMgold.so
 KBUILD_LDFLAGS		+= -plugin-opt=-function-sections
 KBUILD_LDFLAGS		+= -plugin-opt=-data-sections
+KBUILD_LDFLAGS		+= -plugin-opt=whole-program-visibility
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
 LLVM_AR	:= llvm-ar
