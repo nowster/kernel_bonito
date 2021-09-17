@@ -408,9 +408,9 @@ GCC_PLUGINS_CFLAGS :=
 
 # Custom cflags
 
-POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM
+POLLY_CFLAGS := -mllvm -polly -mllvm -polly-run-dce -mllvm -polly-run-inliner -mllvm -polly-opt-fusion=max -mllvm -polly-ast-use-context -mllvm -polly-detect-keep-going -mllvm -polly-vectorizer=stripmine -mllvm -polly-invariant-load-hoisting
 
-LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0
+LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0 -mllvm -inline-threshold=1000 -mllvm -inlinehint-threshold=750
 
 CLANG_FLAGS := -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(LLVM_CFLAGS)
 
@@ -660,6 +660,8 @@ KBUILD_LDFLAGS		+= -plugin-opt=-data-sections
 LLVM_AR	:= llvm-ar
 LLVM_NM	:= llvm-nm
 export LLVM_AR LLVM_NM
+# Set O3 optimization level for LTO
+LDFLAGS		+= --plugin-opt=O3
 endif
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
@@ -690,7 +692,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
 endif
 
 ifdef CONFIG_LTO_CLANG
-lto-clang-flags	:= -flto=thin -fsplit-lto-unit -fvisibility=default
+lto-clang-flags	:= -flto=full -fvisibility=hidden
 
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
