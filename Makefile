@@ -408,9 +408,9 @@ GCC_PLUGINS_CFLAGS :=
 
 # Custom cflags
 
-POLLY_CFLAGS := -mllvm -polly -mllvm -polly-run-dce -mllvm -polly-run-inliner -mllvm -polly-opt-fusion=max -mllvm -polly-ast-use-context -mllvm -polly-detect-keep-going -mllvm -polly-vectorizer=stripmine -mllvm -polly-invariant-load-hoisting
+POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-inliner -mllvm -polly-opt-fusion=max -mllvm -polly-ast-use-context -mllvm -polly-detect-keep-going -mllvm -polly-invariant-load-hoisting -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM
 
-LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0 -mllvm -inline-threshold=1000 -mllvm -inlinehint-threshold=750
+LLVM_CFLAGS := -align-neon-spills -mllvm -split-spill-mode=speed -debug-pass=Disabled -dwarf-accel-tables=Disable -asan-globals=0
 
 CLANG_FLAGS := -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS) $(LLVM_CFLAGS)
 
