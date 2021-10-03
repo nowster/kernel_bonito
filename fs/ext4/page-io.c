@@ -476,13 +476,14 @@ int ext4_bio_write_page(struct ext4_io_submit *io,
 			if (ret == -ENOMEM && wbc->sync_mode == WB_SYNC_ALL) {
 				if (io->io_bio) {
 					ext4_io_submit(io);
-				else
+				 } else {
 					gfp_flags |= __GFP_NOFAIL;
 				congestion_wait(BLK_RW_ASYNC, HZ/50);
 				goto retry_encrypt;
-			}
+				}
 			bounce_page = NULL;
 			goto out;
+			}
 		}
 	}
 
