@@ -55,6 +55,7 @@ config KPROBES
 config JUMP_LABEL
        bool "Optimize very unlikely/likely branches"
        depends on HAVE_ARCH_JUMP_LABEL
+       depends on !LTO_CLANG
        help
          This option enables a transparent branch optimization that
 	 makes certain almost-always-true or almost-always-false branch
@@ -605,6 +606,14 @@ config SHADOW_CALL_STACK
 	    https://clang.llvm.org/docs/ShadowCallStack.html
 
 endchoice
+
+config LLVM_POLLY
+	bool "Enable LLVM's polyhedral loop optimizer (Polly)"
+	help
+	  This option enables LLVM's polyhedral loop optimizer known as Polly.
+	  Polly is able to optimize various loops throughout the kernel for
+	  maximum cache locality. This requires an LLVM toolchain explicitly
+	  compiled with Polly support.
 
 config HAVE_ARCH_WITHIN_STACK_FRAMES
 	bool
