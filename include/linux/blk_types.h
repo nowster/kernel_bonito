@@ -96,7 +96,7 @@ struct bio {
 
 	struct bio_set		*bi_pool;
 
-	unsigned long bi_alloc_ts;
+	ktime_t bi_alloc_ts;
 
 	/*
 	 * We can inline a number of vecs at the end of the bio, to avoid
