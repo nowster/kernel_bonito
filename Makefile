@@ -403,7 +403,7 @@ KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
-KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
+KBUILD_LDFLAGS_MODULE = -T $(srctree)/scripts/module-common.lds $(if $(CONFIG_PROFILING),,-s)
 
 POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-inliner -mllvm -polly-opt-fusion=max -mllvm -polly-ast-use-context -mllvm -polly-detect-keep-going -mllvm -polly-invariant-load-hoisting -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM
 
@@ -659,10 +659,11 @@ ifdef CONFIG_LTO_CLANG
 # use GNU gold with LLVMgold or LLD for LTO linking, and LD for vmlinux_link
 ifeq ($(ld-name),gold)
 KBUILD_LDFLAGS		+= --plugin=LLVMgold.so
-KBUILD_LDFLAGS		+= --plugin-opt=-function-sections
-KBUILD_LDFLAGS		+= --plugin-opt=-data-sections
 KBUILD_LDFLAGS		+= --plugin-opt=whole-program-visibility
 endif
+KBUILD_LDFLAGS		+= --plugin-opt=-function-sections
+KBUILD_LDFLAGS		+= --plugin-opt=-data-sections
+KBUILD_LDFLAGS		+= --plugin-opt=O3
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
 LLVM_AR		:= llvm-ar
@@ -1361,7 +1362,6 @@ endif
 
 PHONY += modules
 modules: $(vmlinux-dirs) $(if $(KBUILD_BUILTIN),vmlinux) modules.builtin
-	$(Q)$(AWK) '!x[$$0]++' $(vmlinux-dirs:%=$(objtree)/%/modules.order) > $(objtree)/modules.order
 	@$(kecho) '  Building modules, stage 2.';
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modpost
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.fwinst obj=firmware __fw_modbuild
@@ -1391,7 +1391,6 @@ _modinst_:
 		rm -f $(MODLIB)/build ; \
 		ln -s $(CURDIR) $(MODLIB)/build ; \
 	fi
-	@cp -f $(objtree)/modules.order $(MODLIB)/
 	@cp -f $(objtree)/modules.builtin $(MODLIB)/
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modinst
 
