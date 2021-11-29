@@ -405,9 +405,7 @@ KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE = -T $(srctree)/scripts/module-common.lds $(if $(CONFIG_PROFILING),,-s)
 
-POLLY_CFLAGS := -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-inliner -mllvm -polly-opt-fusion=max -mllvm -polly-ast-use-context -mllvm -polly-detect-keep-going -mllvm -polly-invariant-load-hoisting -mllvm -polly-run-dce -mllvm -polly-omp-backend=LLVM
-
-CLANG_FLAGS := -O3 -fassociative-math -freciprocal-math -ffp-contract=fast -mtune=cortex-a55 -mfpu=NEON $(POLLY_CFLAGS)
+CLANG_FLAGS := -O3 -opt -fopenmp -freciprocal-math -mtune=cortex-a55
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
