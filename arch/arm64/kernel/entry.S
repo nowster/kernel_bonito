@@ -1037,6 +1037,9 @@ __ni_sys_trace:
 	.macro tramp_data_read_var	dst, var
 #ifdef CONFIG_RANDOMIZE_BASE
 	tramp_data_page		\dst
+#ifndef CONFIG_ARCH_MSM8996
+	isb
+#endif
 	add	\dst, \dst, #:lo12:__entry_tramp_data_\var
 	ldr	\dst, [\dst]
 #else
