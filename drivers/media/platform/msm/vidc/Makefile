@@ -25,3 +25,4 @@ obj-$(CONFIG_MSM_VIDC_VMEM) += vmem/
 # TODO: remove me b/62058353
 subdir-ccflags-y += \
   -Wno-pointer-bool-conversion \
+  -std=gnu89 \
