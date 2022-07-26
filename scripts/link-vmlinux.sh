@@ -99,6 +99,12 @@ modversions()
 modpost_link()
 {
 	local objects
+	local strip_debug
+	
+	# The kallsyms linking does not need debug symbols included.
+	if [ "$output" != "${output#.tmp_vmlinux.kallsyms}" ] ; then
+		strip_debug=-Wl,--strip-debug
+	fi
 
 	if [ -n "${CONFIG_THIN_ARCHIVES}" ]; then
 		objects="--whole-archive				\
@@ -193,6 +199,7 @@ vmlinux_link()
 		fi
 
 		${CC} ${CFLAGS_vmlinux} -o ${2}				\
+			${strip_debug}					\
 			-Wl,-T,${lds}					\
 			${objects}					\
 			-lutil -lrt -lpthread
@@ -267,7 +274,6 @@ cleanup()
 {
 	rm -f .old_version
 	rm -f .tmp_System.map
-	rm -f .tmp_kallsyms*
 	rm -f .tmp_version
 	rm -f .tmp_symversions
 	rm -f .tmp_vmlinux*
@@ -293,8 +299,6 @@ on_signals()
 }
 trap on_signals HUP INT QUIT TERM
 
-#
-#
 # Use "make V=1" to debug this script
 case "${KBUILD_VERBOSE}" in
 *1*)
